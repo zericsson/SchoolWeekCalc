@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Schulwochen-Rechner</title>
+    <link rel="stylesheet" href="public/css/styles.css">
+  </head>
+
+  <body>
+    <!-- Help Button -->
+    <button id="helpBtn" class="help-button" title="Hilfe anzeigen" aria-label="Hilfe">
+      ?
+    </button>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Hilfe zum Schulwochen-Rechner</h2>
+        
+        <div class="help-section">
+          <h3>Wie benutze ich diese Anwendung?</h3>
+          <p>
+            Mit dem Schulwochen-Rechner können Sie die Anzahl der Schultage und Schulwochen 
+            zwischen zwei Daten berechnen. Die Berechnung berücksichtigt dabei alle offiziellen 
+            Feiertage und Schulferien des ausgewählten Bundeslandes.
+          </p>
+        </div>
+
+        <div class="help-section">
+          <h3>Eingabefelder</h3>
+          <ul>
+            <li><strong>Startdatum:</strong> Das erste Datum der Berechnung</li>
+            <li><strong>Enddatum:</strong> Das letzte Datum der Berechnung</li>
+            <li><strong>Bundesland:</strong> Wählen Sie Ihr Bundesland aus, um die korrekten Feiertage und Schulferien zu berücksichtigen</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Ergebnisse</h3>
+          <ul>
+            <li><strong>Schultage:</strong> Die Anzahl der Wochentage (Montag-Freitag), ohne Feiertage und Schulferien</li>
+            <li><strong>Schulwochen:</strong> Die Anzahl der Kalenderwochen (ISO 8601) im ausgewählten Zeitraum</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Hinweise</h3>
+          <ul>
+            <li>Wochenenden (Samstag und Sonntag) werden nicht als Schultage gezählt</li>
+            <li>Feiertage und Schulferien des ausgewählten Bundeslandes werden automatisch ausgeschlossen</li>
+            <li>Die Berechnung basiert auf dem ISO 8601 Wochenkalender</li>
+          </ul>
+        </div>
+
+        <div class="help-footer">
+          <p>Version: <strong id="app-version">1.0.0</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <h1>Schulwochen-Rechner</h1>
+
+    <form id="schoolWeeksForm">
+      <label>
+        Startdatum:
+        <input type="date" id="startDate" required />
+      </label>
+
+      <br /><br />
+
+      <label>
+        Enddatum:
+        <input type="date" id="endDate" required />
+      </label>
+
+      <br /><br />
+
+      <label>
+        Bundesland:
+        <select id="federalState">
+          <option value="baden-wuerttemberg">Baden-Württemberg</option>
+          <option value="bayern">Bayern</option>
+          <option value="berlin">Berlin</option>
+          <option value="brandenburg">Brandenburg</option>
+          <option value="bremen">Bremen</option>
+          <option value="hamburg">Hamburg</option>
+          <option value="hessen">Hessen</option>
+          <option value="mecklenburg-vorpommern">Mecklenburg-Vorpommern</option>
+          <option value="niedersachsen">Niedersachsen</option>
+          <option value="nordrhein-westfalen">Nordrhein-Westfalen</option>
+          <option value="rheinland-pfalz">Rheinland-Pfalz</option>
+          <option value="saarland">Saarland</option>
+          <option value="sachsen">Sachsen</option>
+          <option value="sachsen-anhalt">Sachsen-Anhalt</option>
+          <option value="schleswig-holstein">Schleswig-Holstein</option>
+          <option value="thueringen">Thüringen</option>
+        </select>
+      </label>
+
+      <br /><br />
+
+      <button type="submit">Berechnen</button>
+    </form>
+
+    <hr class="result-divider" />
+    
+    <div id="submission-info-container" style="display: none;">
+      <div class="submission-info">
+        <p><strong>Startdatum:</strong> <span id="info-startDate">-</span></p>
+        <p><strong>Enddatum:</strong> <span id="info-endDate">-</span></p>
+        <p><strong>Bundesland:</strong> <span id="info-federalState">-</span></p>
+        <p><strong>Zeitpunkt der Anfrage:</strong> <span id="info-timestamp">-</span></p>
+      </div>
+    </div>
+    
+    <div id="result-container" style="display: none;">
+      <table id="result-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Tage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Schultage</td>
+            <td id="school-days">-</td>
+          </tr>
+          <tr>
+            <td>Schulwochen</td>
+            <td id="calendar-weeks">-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="calendar-container"></div>
+
+    <script type="module" src="public/js/app.js"></script>
+  </body>
+</html>
