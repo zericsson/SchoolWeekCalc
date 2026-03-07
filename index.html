@@ -42,8 +42,21 @@
           <h3>Ergebnisse</h3>
           <ul>
             <li><strong>Schultage:</strong> Die Anzahl der Wochentage (Montag-Freitag), ohne Feiertage und Schulferien</li>
-            <li><strong>Schulwochen:</strong> Die Anzahl der Kalenderwochen (ISO 8601) im ausgewählten Zeitraum</li>
+            <li><strong>Schulwochen:</strong> Die Anzahl der Schulwochen basierend auf ISO 8601 Kalenderwochen</li>
           </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Berechnungsmethode: Schulwochen</h3>
+          <p>
+            Die Schulwochen werden basierend auf ISO 8601 Kalenderwochen mit gewichteter Berechnung für Randwochen berechnet:
+          </p>
+          <ul>
+            <li><strong>Startwoche:</strong> Anteil abhängig vom Wochentag (Montag = 1.0, Dienstag = 0.8, ..., Freitag = 0.2)</li>
+            <li><strong>Volle Wochen dazwischen:</strong> Zählen nur, wenn sie mindestens einen Schultag enthalten</li>
+            <li><strong>Endwoche:</strong> Anteil abhängig vom Wochentag (Montag = 0.2, Dienstag = 0.4, ..., Freitag = 1.0)</li>
+          </ul>
+          <p><em>Wochenenden werden nicht berücksichtigt.</em></p>
         </div>
 
         <div class="help-section">

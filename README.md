@@ -76,16 +76,21 @@ Schulwochen = Anzahl_Schultage / 5
 ```
 
 ### Methode B: ISO-8601 Kalenderwochen
-Basierend auf vollständigen ISO-Kalenderwochen mit Gewichtung für Randwochen.
+Basierend auf ISO-Kalenderwochen mit gewichteter Berechnung für Randwochen. Volle Wochen zählen nur, wenn sie mindestens einen Schultag enthalten (Feiertage und Schulferien berücksichtigt).
 
 **Formel:**
 ```
-Schulwochen = (Wochentag_Start × 0.2) + (Volle_Wochen) + (Wochentag_Ende × 0.2)
+Schulwochen = (Anteil_Startwoche) + (Volle_Schulwochen) + (Anteil_Endwoche)
 ```
 
 Wobei:
-- Montag = 5, Dienstag = 4, ..., Freitag = 1
-- Samstag, Sonntag = 0 (nicht berücksichtigt)
+- **Anteil_Startwoche** (je nach Wochentag des Startdatums):
+  - Montag = 1.0, Dienstag = 0.8, Mittwoch = 0.6, Donnerstag = 0.4, Freitag = 0.2
+  - Samstag, Sonntag = 0
+- **Volle_Schulwochen**: ISO-Wochen zwischen Start und End, die mindestens einen Schultag enthalten
+- **Anteil_Endwoche** (je nach Wochentag des Enddatums):
+  - Montag = 0.2, Dienstag = 0.4, Mittwoch = 0.6, Donnerstag = 0.8, Freitag = 1.0
+  - Samstag, Sonntag = 0
 
 ## Features der Benutzeroberfläche
 
