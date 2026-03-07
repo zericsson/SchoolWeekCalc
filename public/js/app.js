@@ -3,7 +3,7 @@ import { getNumberOfISOWeeks } from "../../src/schoolWeekCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.0.2";
+const APP_VERSION = "1.0.3";
 
 // Wir warten, bis das HTML vollständig geladen ist
 document.addEventListener("DOMContentLoaded", () => {
@@ -62,8 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
  * @returns {number} - Anzahl der Schultage
  */
 function calculateSchoolDays(startDateStr, endDateStr, holidays) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
+  // Parse dates manually to avoid timezone issues
+  const [startYear, startMonth, startDay] = startDateStr.split('-');
+  const [endYear, endMonth, endDay] = endDateStr.split('-');
+  
+  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
+  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
 
   let schoolDays = 0;
   const currentDate = new Date(startDate);
@@ -93,8 +97,12 @@ function calculateSchoolDays(startDateStr, endDateStr, holidays) {
  * @param {HTMLSelectElement} federalStateSelect - The federal state select element
  */
 function displaySubmissionInfo(startDateStr, endDateStr, federalStateSelect) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
+  // Parse dates manually to avoid timezone issues
+  const [startYear, startMonth, startDay] = startDateStr.split('-');
+  const [endYear, endMonth, endDay] = endDateStr.split('-');
+  
+  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
+  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
   
   // Format dates in German locale
   const startDateFormatted = startDate.toLocaleDateString('de-DE');
@@ -118,8 +126,12 @@ function renderCalendarRange(startStr, endStr, holidays) {
   const container = document.getElementById("calendar-container");
   container.innerHTML = "";
 
-  const startDate = new Date(startStr);
-  const endDate = new Date(endStr);
+  // Parse dates manually to avoid timezone issues
+  const [startYear, startMonth, startDay] = startStr.split('-');
+  const [endYear, endMonth, endDay] = endStr.split('-');
+  
+  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
+  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
 
   let current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
 

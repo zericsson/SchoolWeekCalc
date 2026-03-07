@@ -8,8 +8,12 @@ import { getReadableDateString } from "./dateExtension.js";
  * @returns {string} - Anzahl der Schulwochen mit einer Dezimalstelle
  */
 export function getNumberOfISOWeeks(startDateStr, endDateStr, holidays) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
+  // Parse dates manually to avoid timezone issues
+  const [startYear, startMonth, startDay] = startDateStr.split('-');
+  const [endYear, endMonth, endDay] = endDateStr.split('-');
+  
+  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
+  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
 
   if (startDate > endDate) {
     throw new Error("Startdatum liegt nach dem Enddatum");
@@ -27,10 +31,10 @@ export function getNumberOfISOWeeks(startDateStr, endDateStr, holidays) {
   }
 
   // Erste Woche anteilig (basierend auf Wochentag, nicht auf Schultage)
-  const firstWeekPart = calculateStartWeekPart(startDate);
+  const firstWeekPart = calculateStartWeekPart(startDate, holidays, startISO);
 
   // Letzte Woche anteilig (basierend auf Wochentag, nicht auf Schultage)
-  const lastWeekPart = calculateEndWeekPart(endDate);
+  const lastWeekPart = calculateEndWeekPart(endDate, holidays, endISO);
 
   // Ganze Wochen dazwischen
   const fullWeeksBetween = calculateFullWeeksBetween(startISO, endISO, holidays);
@@ -39,22 +43,40 @@ export function getNumberOfISOWeeks(startDateStr, endDateStr, holidays) {
 }
 
 /**
- * Gibt ISO-Wochendaten für ein bestimmtes Datum zurück
- * @param {Date} date - Das Datum
- * @returns {object} - Objekt mit isoYear und isoWeek
+ * Returns ISO week data for a given date without duplicate weeks across years.
+ * The week is uniquely identified by its Monday (weekStart).
+ *
+ * @param {Date} date
+ * @returns {{isoYear:number, isoWeek:number, weekStart:Date}}
  */
 function getISOWeekData(date) {
-  const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  
-  // Donnerstag bestimmt ISO-Jahr
-  tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay() || 7));
-  
-  const isoYear = tempDate.getUTCFullYear();
-  
-  const yearStart = new Date(Date.UTC(isoYear, 0, 1));
-  const weekNumber = Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
 
-  return { isoYear, isoWeek: weekNumber };
+  // normalize date (remove time)
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  // get Monday of the current ISO week
+  const day = d.getDay() || 7; // convert Sunday (0) → 7
+  d.setDate(d.getDate() - day + 1);
+
+  const weekStart = new Date(d); // unique week identifier
+
+  // determine ISO year using Thursday rule
+  const thursday = new Date(d);
+  thursday.setDate(thursday.getDate() + 3);
+  const isoYear = thursday.getFullYear();
+
+  // calculate week number
+  const firstThursday = new Date(isoYear, 0, 4);
+  const firstDay = firstThursday.getDay() || 7;
+  firstThursday.setDate(firstThursday.getDate() - firstDay + 1);
+
+  const isoWeek = Math.floor((weekStart - firstThursday) / 604800000) + 1;
+
+  return {
+    isoYear,
+    isoWeek,
+    weekStart
+  };
 }
 
 /**
@@ -102,45 +124,69 @@ function getEndOfISOWeek(date) {
 
 /**
  * Berechnet den Anteil der Startwoche basierend auf dem Wochentag
+ * Wenn das Datum ein 'schulfreier' Tag ist, wird der nächste Schultag geprüft
  * Formel: (startWeekDay_DayOfWeek * 0.2)
  * Montag = 5, Dienstag = 4, Mittwoch = 3, Donnerstag = 2, Freitag = 1
  * Samstag = 0, Sonntag = 0
  * @param {Date} date - Das Startdatum
+ * @param {Set<string>} holidays - Set von Feiertagen im Format YYYY-MM-DD
  * @returns {number} - Anteil der Startwoche (0-1)
  */
-function calculateStartWeekPart(date) {
+function calculateStartWeekPart(date, holidays, isoWeek) {
   const dayOfWeek = date.getDay();
-  
+  const dateStr = getReadableDateString(date);
+  const isHoliday = holidays.has(dateStr);
+
   // dayOfWeek: 0 = Sonntag, 1 = Montag, ..., 6 = Samstag
-  // Nur Wochentage zählen (Montag-Freitag)
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return 0; // Wochenende
+  // Wenn das Datum ein Wochenendtag oder 'schulfreier' Tag ist, nächsten Tag prüfen
+  if (dayOfWeek === 0 || dayOfWeek === 6 || isHoliday) {
+    const nextDate = new Date(date);
+    nextDate.setDate(nextDate.getDate() + 1);
+    
+    const nextWeek = getISOWeekData(nextDate);
+    if (nextWeek.weekStart.getTime() !== isoWeek.weekStart.getTime()) {
+      return 0;
+    }
+
+    return calculateStartWeekPart(nextDate, holidays, isoWeek);
   }
   
   // Montag (1) -> 5, Dienstag (2) -> 4, ..., Freitag (5) -> 1
   const weekValue = 6 - dayOfWeek;
-  return weekValue * 0.2;
+  return weekValue / 5;
 }
 
 /**
  * Berechnet den Anteil der Endwoche basierend auf dem Wochentag
+ * Wenn das Datum ein 'schulfreier' Tag ist, wird der vorherige Schultag geprüft
  * Formel: (endWeekDay_DayOfWeek * 0.2)
  * Montag = 1, Dienstag = 2, Mittwoch = 3, Donnerstag = 4, Freitag = 5
  * Samstag = 0, Sonntag = 0
  * @param {Date} date - Das Enddatum
+ * @param {Set<string>} holidays - Set von Feiertagen im Format YYYY-MM-DD
  * @returns {number} - Anteil der Endwoche (0-1)
  */
-function calculateEndWeekPart(date) {
+function calculateEndWeekPart(date, holidays, isoWeek) {
   const dayOfWeek = date.getDay();
+  const dateStr = getReadableDateString(date);
+  const isHoliday = holidays.has(dateStr);
   
   // dayOfWeek: 0 = Sonntag, 1 = Montag, ..., 6 = Samstag
-  // Nur Wochentage zählen (Montag-Freitag)
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return 0; // Wochenende
+  // Wenn das Datum ein Wochenendtag oder 'schulfreier' Tag ist, vorherigen Tag prüfen
+  if (dayOfWeek === 0 || dayOfWeek === 6 || isHoliday) {
+    const prevDate = new Date(date);
+    prevDate.setDate(prevDate.getDate() - 1);
+    
+    const prevWeek = getISOWeekData(prevDate);
+    if (prevWeek.weekStart.getTime() !== isoWeek.weekStart.getTime()) {
+      return 0;
+    }
+
+    return calculateEndWeekPart(prevDate, holidays, isoWeek);
   }
   
   // Montag (1) -> 1, Dienstag (2) -> 2, ..., Freitag (5) -> 5
-  return dayOfWeek * 0.2;
+  return dayOfWeek / 5;
 }
 
 /**
@@ -259,7 +305,8 @@ function hasSchoolDay(start, end, holidays) {
  * @returns {number} - Anzahl der ISO-Wochen (52 oder 53)
  */
 function getISOWeeksInYear(year) {
-  const d = new Date(Date.UTC(year, 11, 31));
+  // Check the last day of the year to determine the week count
+  const d = new Date(year, 11, 31);
   const week = getISOWeekData(d).isoWeek;
   return week === 1 ? 52 : week;
 }
