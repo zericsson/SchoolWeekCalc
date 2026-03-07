@@ -45,38 +45,46 @@ export function getNumberOfISOWeeks(startDateStr, endDateStr, holidays) {
 /**
  * Returns ISO week data for a given date without duplicate weeks across years.
  * The week is uniquely identified by its Monday (weekStart).
+ * Uses local date/time throughout; DST-safe arithmetic via UTC noon anchors.
  *
  * @param {Date} date
  * @returns {{isoYear:number, isoWeek:number, weekStart:Date}}
  */
 function getISOWeekData(date) {
-
-  // normalize date (remove time)
+  // Normalize to local midnight (strips time component in local time)
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  // get Monday of the current ISO week
-  const day = d.getDay() || 7; // convert Sunday (0) → 7
+  // Rewind to Monday of the current ISO week (local time)
+  const day = d.getDay() || 7; // Sunday (0) → 7
   d.setDate(d.getDate() - day + 1);
-
   const weekStart = new Date(d); // unique week identifier
 
-  // determine ISO year using Thursday rule
+  // Determine ISO year via Thursday rule (local time)
   const thursday = new Date(d);
   thursday.setDate(thursday.getDate() + 3);
   const isoYear = thursday.getFullYear();
 
-  // calculate week number
+  // Anchor both week boundaries at UTC noon to neutralise DST offsets
+  // during millisecond arithmetic
+  const weekStartUTC = Date.UTC(
+    weekStart.getFullYear(),
+    weekStart.getMonth(),
+    weekStart.getDate(),
+    12 // noon anchor
+  );
   const firstThursday = new Date(isoYear, 0, 4);
   const firstDay = firstThursday.getDay() || 7;
-  firstThursday.setDate(firstThursday.getDate() - firstDay + 1);
+  firstThursday.setDate(firstThursday.getDate() - firstDay + 1); // Monday of week 1
+  const firstThursdayUTC = Date.UTC(
+    firstThursday.getFullYear(),
+    firstThursday.getMonth(),
+    firstThursday.getDate(),
+    12 // noon anchor
+  );
 
-  const isoWeek = Math.floor((weekStart - firstThursday) / 604800000) + 1;
+  const isoWeek = Math.round((weekStartUTC - firstThursdayUTC) / 604800000) + 1;
 
-  return {
-    isoYear,
-    isoWeek,
-    weekStart
-  };
+  return { isoYear, isoWeek, weekStart };
 }
 
 /**
@@ -144,7 +152,7 @@ function calculateStartWeekPart(date, holidays, isoWeek) {
     nextDate.setDate(nextDate.getDate() + 1);
     
     const nextWeek = getISOWeekData(nextDate);
-    if (nextWeek.weekStart.getTime() !== isoWeek.weekStart.getTime()) {
+    if (nextWeek.weekStart.toDateString() !== isoWeek.weekStart.toDateString()) {
       return 0;
     }
 
@@ -178,7 +186,7 @@ function calculateEndWeekPart(date, holidays, isoWeek) {
     prevDate.setDate(prevDate.getDate() - 1);
     
     const prevWeek = getISOWeekData(prevDate);
-    if (prevWeek.weekStart.getTime() !== isoWeek.weekStart.getTime()) {
+    if (prevWeek.weekStart.toDateString() !== isoWeek.weekStart.toDateString()) {
       return 0;
     }
 
