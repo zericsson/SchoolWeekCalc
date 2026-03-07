@@ -207,35 +207,40 @@ button:active {
   color: #fbc02d;
 }
 
-#calendar-container {
-  max-width: 100%;
+#calendar-wrapper {
+  width: 100%;
   margin: 0 auto;
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
   overflow-x: auto;
-  padding: 20px 0;
   scroll-behavior: smooth;
-  justify-content: center;
-  align-items: flex-start;
+  padding: 20px 0;
 }
 
-#calendar-container::-webkit-scrollbar {
+#calendar-wrapper::-webkit-scrollbar {
   height: 8px;
 }
 
-#calendar-container::-webkit-scrollbar-track {
+#calendar-wrapper::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-#calendar-container::-webkit-scrollbar-thumb {
+#calendar-wrapper::-webkit-scrollbar-thumb {
   background: #1976d2;
   border-radius: 10px;
 }
 
-#calendar-container::-webkit-scrollbar-thumb:hover {
+#calendar-wrapper::-webkit-scrollbar-thumb:hover {
   background: #1565c0;
+}
+
+#calendar-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 0 20px;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: min-content;
 }
 
 .month {
