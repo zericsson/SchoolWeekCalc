@@ -3,7 +3,7 @@ import { getNumberOfISOWeeks } from "../../src/schoolWeekCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.0.1";
+const APP_VERSION = "1.0.2";
 
 // Wir warten, bis das HTML vollständig geladen ist
 document.addEventListener("DOMContentLoaded", () => {
