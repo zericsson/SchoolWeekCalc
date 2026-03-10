@@ -1,3 +1,5 @@
+import { getReadableDateString } from "./dateExtension.js";
+
 /**
  * Berechnet die Anzahl der Schultage zwischen zwei Daten
  * @param {string} startDateStr - Startdatum im Format YYYY-MM-DD
@@ -5,7 +7,7 @@
  * @param {Set<string>} holidays - Set von Feiertagen
  * @returns {number} - Anzahl der Schultage
  */
-function getSchoolDays(startDateStr, endDateStr, holidays) {
+export function getSchoolDays(startDateStr, endDateStr, holidays) {
   // Parse dates manually to avoid timezone issues
   const [startYear, startMonth, startDay] = startDateStr.split('-');
   const [endYear, endMonth, endDay] = endDateStr.split('-');
