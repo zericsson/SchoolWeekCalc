@@ -112,24 +112,6 @@ export function getISOWeekNumber(date) {
   return 2 + Math.floor(diffInDays / 7);
 }
 
-function getStartOfISOWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay() || 7;
-  if (day !== 1) {
-    d.setDate(d.getDate() - (day - 1));
-  }
-  return d;
-}
-
-function getEndOfISOWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay() || 7;
-  if (day !== 7) {
-    d.setDate(d.getDate() + (7 - day));
-  }
-  return d;
-}
-
 /**
  * Berechnet den Anteil der Startwoche basierend auf dem Wochentag
  * Wenn das Datum ein 'schulfreier' Tag ist, wird der nächste Schultag geprüft

@@ -1,9 +1,10 @@
 import { getHolidayDayList, HolidayType } from "../../src/holidayData.js";
 import { getNumberOfISOWeeks } from "../../src/schoolWeekCalculator.js";
+import { getSchoolDays } from "../../src/schoolDayCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.1.0";
 
 // Wir warten, bis das HTML vollständig geladen ist
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const holidays = await getHolidayDayList(HolidayType.SCHOOL_VACATION_AND_PUBLIC_HOLIDAY, federalStateSelect.value, startDateInput.value, endDateInput.value);
         
         // Calculate school days
-        const schoolDays = calculateSchoolDays(startDateInput.value, endDateInput.value, holidays);
+        const schoolDays = getSchoolDays(startDateInput.value, endDateInput.value, holidays);
         
         // Calculate school weeks
         const schoolWeeks = getNumberOfISOWeeks(startDateInput.value, endDateInput.value, holidays);
@@ -53,42 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
 });
-
-/**
- * Berechnet die Anzahl der Schultage zwischen zwei Daten
- * @param {string} startDateStr - Startdatum im Format YYYY-MM-DD
- * @param {string} endDateStr - Enddatum im Format YYYY-MM-DD
- * @param {Set<string>} holidays - Set von Feiertagen
- * @returns {number} - Anzahl der Schultage
- */
-function calculateSchoolDays(startDateStr, endDateStr, holidays) {
-  // Parse dates manually to avoid timezone issues
-  const [startYear, startMonth, startDay] = startDateStr.split('-');
-  const [endYear, endMonth, endDay] = endDateStr.split('-');
-  
-  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
-  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
-
-  let schoolDays = 0;
-  const currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    const dayOfWeek = currentDate.getDay();
-    // getDay(): 0 = Sonntag, 6 = Samstag
-
-    const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
-    const dateStr = getReadableDateString(currentDate);
-    const isHoliday = holidays.has(dateStr);
-
-    if (isWeekday && !isHoliday) {
-      schoolDays++;
-    }
-
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return schoolDays;
-}
 
 /**
  * Displays the submission information (start date, end date, federal state, and timestamp)
