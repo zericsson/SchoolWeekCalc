@@ -1,7 +1,16 @@
 import { getReadableDateString } from "./dateExtension.js";
 
 /**
- * Berechnet die Anzahl der ISO-Schulwochen zwischen zwei Daten unter Berücksichtigung von Ferien und Feiertagen
+ * Berechnet die Anzahl der Schulwochen zwischen zwei Daten unter Berücksichtigung von Ferien und Feiertagen
+ * @param {number} schoolDays - Anzahl der Schultage
+ * @returns {string} - Anzahl der Schulwochen mit einer Dezimalstelle
+ */
+export function getSchoolWeeksOfSchoolDays(schoolDays) {
+  return (schoolDays / 5).toFixed(1);
+}
+
+/**
+ * Berechnet die Anzahl der ISO-Schulwochen zwischen zwei Daten unter Berücksichtigung von Ferien
  * @param {string} startDateStr - Startdatum im Format YYYY-MM-DD
  * @param {string} endDateStr - Enddatum im Format YYYY-MM-DD
  * @param {Set<string>} holidays - Set von Feiertagen im Format YYYY-MM-DD
@@ -125,11 +134,11 @@ export function getISOWeekNumber(date) {
 function calculateStartWeekPart(date, holidays, isoWeek) {
   const dayOfWeek = date.getDay();
   const dateStr = getReadableDateString(date);
-  const isHoliday = holidays.has(dateStr);
+  const isVacationOrHoliday = holidays.has(dateStr);
 
   // dayOfWeek: 0 = Sonntag, 1 = Montag, ..., 6 = Samstag
   // Wenn das Datum ein Wochenendtag oder 'schulfreier' Tag ist, nächsten Tag prüfen
-  if (dayOfWeek === 0 || dayOfWeek === 6 || isHoliday) {
+  if (dayOfWeek === 0 || dayOfWeek === 6 || isVacationOrHoliday) {
     const nextDate = new Date(date);
     nextDate.setDate(nextDate.getDate() + 1);
     
@@ -159,11 +168,11 @@ function calculateStartWeekPart(date, holidays, isoWeek) {
 function calculateEndWeekPart(date, holidays, isoWeek) {
   const dayOfWeek = date.getDay();
   const dateStr = getReadableDateString(date);
-  const isHoliday = holidays.has(dateStr);
+  const isVacationOrHoliday = holidays.has(dateStr);
   
   // dayOfWeek: 0 = Sonntag, 1 = Montag, ..., 6 = Samstag
   // Wenn das Datum ein Wochenendtag oder 'schulfreier' Tag ist, vorherigen Tag prüfen
-  if (dayOfWeek === 0 || dayOfWeek === 6 || isHoliday) {
+  if (dayOfWeek === 0 || dayOfWeek === 6 || isVacationOrHoliday) {
     const prevDate = new Date(date);
     prevDate.setDate(prevDate.getDate() - 1);
     
@@ -194,9 +203,9 @@ function calculatePartialWeek(start, end, holidays) {
     const day = current.getDay();
     const isWeekday = day >= 1 && day <= 5;
     const dateStr = getReadableDateString(current);
-    const isHoliday = holidays.has(dateStr);
+    const isVacationOrHoliday = holidays.has(dateStr);
 
-    if (isWeekday && !isHoliday) {
+    if (isWeekday && !isVacationOrHoliday) {
       schoolDays++;
     }
 

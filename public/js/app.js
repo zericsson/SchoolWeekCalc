@@ -1,12 +1,11 @@
 import { getHolidayDayList, HolidayType } from "../../src/holidayData.js";
-import { getNumberOfISOWeeks } from "../../src/schoolWeekCalculator.js";
+import { getSchoolWeeksOfSchoolDays, getNumberOfISOWeeks } from "../../src/schoolWeekCalculator.js";
 import { getSchoolDays } from "../../src/schoolDayCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
 const APP_VERSION = "1.1.0";
 
-// Wir warten, bis das HTML vollständig geladen ist
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize help modal
   initializeHelpModal();
@@ -15,10 +14,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const startDateInput = document.getElementById("startDate");
   const endDateInput = document.getElementById("endDate");
   const federalStateSelect = document.getElementById("federalState"); //Bundesland
+  const pill = document.getElementById('modePill');
+  const hint = document.getElementById('modeHint');
   const resultContainer = document.getElementById("result-container");
   const submissionInfoContainer = document.getElementById("submission-info-container");
   const schoolDaysCell = document.getElementById("school-days");
   const calendarWeeksCell = document.getElementById("calendar-weeks");
+  const calculationModeName = document.getElementById("calculationModeName");
+
+  const hints = {
+    count: 'Anzahl der Kalenderwochen ohne Feiertage und Schulferien – geeignet für Schulwochenzählungen zwischen zwei Daten.',
+    bill:  'Wochen: Hochrechnung der Schultage (keine Feiertage/Ferien) – geeignet für Lohnabrechnung und Gehaltsplanung.'
+  };
+
+  pill.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      pill.classList.toggle('pro-active', r.value === 'bill');
+      hint.textContent = hints[r.value];
+    });
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault(); // verhindert Seiten-Reload
@@ -30,9 +44,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const schoolDays = getSchoolDays(startDateInput.value, endDateInput.value, holidays);
         
         // Calculate school weeks
-        const schoolWeeks = getNumberOfISOWeeks(startDateInput.value, endDateInput.value, holidays);
-
+        const calcMode = document.querySelector('[name="calcMode"]:checked').value;
+        var schoolWeeks = 0;
+        if (calcMode === 'bill') {
+          schoolWeeks = getSchoolWeeksOfSchoolDays(schoolDays)
+        } else {
+          schoolWeeks = getNumberOfISOWeeks(startDateInput.value, endDateInput.value, holidays);
+        }
+        
         // Update table
+
+
+        // Set calculation mode name in table header
+        const selectedMode = document.querySelector('[name="calcMode"]:checked').value;
+        calculationModeName.textContent = selectedMode === 'count' ? 'Zählung' : 'Abrechnung';
+
         schoolDaysCell.textContent = schoolDays;
         calendarWeeksCell.textContent = schoolWeeks;
         resultContainer.style.display = "block";
@@ -62,29 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
  * @param {HTMLSelectElement} federalStateSelect - The federal state select element
  */
 function displaySubmissionInfo(startDateStr, endDateStr, federalStateSelect) {
-  // Parse dates manually to avoid timezone issues
-  const [startYear, startMonth, startDay] = startDateStr.split('-');
-  const [endYear, endMonth, endDay] = endDateStr.split('-');
-  
-  const startDate = new Date(parseInt(startYear), parseInt(startMonth) - 1, parseInt(startDay));
-  const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
-  
-  // Format dates in German locale
-  const startDateFormatted = startDate.toLocaleDateString('de-DE');
-  const endDateFormatted = endDate.toLocaleDateString('de-DE');
-  
-  // Get the selected federal state text
-  const federalStateName = federalStateSelect.options[federalStateSelect.selectedIndex].text;
-  
-  // Get current time
-  const now = new Date();
-  const timeFormatted = now.toLocaleString('de-DE');
-  
-  // Update the info elements
-  document.getElementById("info-startDate").textContent = startDateFormatted;
-  document.getElementById("info-endDate").textContent = endDateFormatted;
-  document.getElementById("info-federalState").textContent = federalStateName;
-  document.getElementById("info-timestamp").textContent = timeFormatted;
+  const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+  const [endYear,   endMonth,   endDay  ] = endDateStr.split('-').map(Number);
+
+  const startDate = new Date(startYear, startMonth - 1, startDay);
+  const endDate   = new Date(endYear,   endMonth   - 1, endDay);
+
+  const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+  const timeOptions = { ...dateOptions, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+
+  document.getElementById("info-startDate").textContent    = startDate.toLocaleDateString('de-DE', dateOptions);
+  document.getElementById("info-endDate").textContent      = endDate.toLocaleDateString('de-DE', dateOptions);
+  document.getElementById("info-federalState").textContent = federalStateSelect.options[federalStateSelect.selectedIndex].text;
+  document.getElementById("info-timestamp").textContent    = new Date().toLocaleString('de-DE', timeOptions);
 }
 
 function renderCalendarRange(startStr, endStr, holidays) {
@@ -233,6 +249,7 @@ function initializeHelpModal() {
   const helpBtn = document.getElementById("helpBtn");
   const helpModal = document.getElementById("helpModal");
   const closeBtn = document.querySelector(".close-btn");
+  const calculationModeName = document.getElementById("calculationModeName");
   const appVersionElement = document.getElementById("app-version");
 
   // Set app version in modal
