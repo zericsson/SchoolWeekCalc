@@ -67,7 +67,7 @@ CalcSchoolWeeks/
 
 ## Berechnungsmethoden
 
-### Methode A: Arbeitstage-basiert
+### Methode 'Zählung': Arbeitstage-basiert
 Zählt die tatsächlichen Schultage (Montag-Freitag) ohne Feiertage und Schulferien und teilt durch 5.
 
 **Formel:**
@@ -75,7 +75,7 @@ Zählt die tatsächlichen Schultage (Montag-Freitag) ohne Feiertage und Schulfer
 Schulwochen = Anzahl_Schultage / 5
 ```
 
-### Methode B: ISO-8601 Kalenderwochen
+### Methode 'Abrechnung': ISO-8601 Kalenderwochen
 Basierend auf ISO-Kalenderwochen mit gewichteter Berechnung für Randwochen. Volle Wochen zählen nur, wenn sie mindestens einen Schultag enthalten (Feiertage und Schulferien berücksichtigt).
 
 **Formel:**
