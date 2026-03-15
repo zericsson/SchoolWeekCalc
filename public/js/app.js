@@ -4,7 +4,7 @@ import { getSchoolDays } from "../../src/schoolDayCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.1.1";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize help modal
@@ -27,12 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
     bill:  'Wochen: Hochrechnung der Schultage (keine Feiertage/Ferien) – geeignet für Lohnabrechnung und Gehaltsplanung.'
   };
 
+  function syncToggle(value) {
+    pill.classList.toggle('pro-active', value === 'bill');
+    hint.textContent = hints[value];
+  }
+
+  // Sync on every change
   pill.querySelectorAll('input[type="radio"]').forEach(r => {
-    r.addEventListener('change', () => {
-      pill.classList.toggle('pro-active', r.value === 'bill');
-      hint.textContent = hints[r.value];
-    });
+    r.addEventListener('change', () => syncToggle(r.value));
   });
+
+  const checked = pill.querySelector('input[type="radio"]:checked');
+  if (checked) syncToggle(checked.value);
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault(); // verhindert Seiten-Reload
