@@ -4,7 +4,7 @@ import { getSchoolDays } from "../../src/schoolDayCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.1.1";
+const APP_VERSION = "1.1.2";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize help modal
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Calculate school weeks
         const calcMode = document.querySelector('[name="calcMode"]:checked').value;
         var schoolWeeks = 0;
-        if (calcMode === 'bill') {
+        if (calcMode === 'schoolDays') {
           schoolWeeks = getSchoolWeeksOfSchoolDays(schoolDays)
         } else {
           schoolWeeks = getNumberOfISOWeeks(startDateInput.value, endDateInput.value, holidays);
