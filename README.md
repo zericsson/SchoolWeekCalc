@@ -36,7 +36,8 @@ CalcSchoolWeeks/
 └── src/
     ├── dateExtension.js      # Date-Prototyp-Erweiterungen
     ├── holidayData.js        # Statische Feiertagsdaten
-    ├── schoolWeekCalculator.js # Berechnungslogik
+    ├── schoolWeekCalculator.js   # Berechnungslogik Schulwochen
+    ├── schoolDayCalculator.js    # Berechnungslogik Schultage
     └── api/
         └── holidaysApi.js    # API-Kommunikation für Feiertage
 ```
@@ -65,17 +66,9 @@ CalcSchoolWeeks/
    - Wählen Sie das gewünschte Bundesland
    - Ergebnisse werden sofort angezeigt
 
-## Berechnungsmethoden
+## Berechnungsmethoden Schulwochen
 
-### Methode 'Zählung': Arbeitstage-basiert
-Zählt die tatsächlichen Schultage (Montag-Freitag) ohne Feiertage und Schulferien und teilt durch 5.
-
-**Formel:**
-```
-Schulwochen = Anzahl_Schultage / 5
-```
-
-### Methode 'Abrechnung': ISO-8601 Kalenderwochen
+### Auf Basis von 'Kalenderwochen': ISO-8601 Kalenderwochen
 Basierend auf ISO-Kalenderwochen mit gewichteter Berechnung für Randwochen. Volle Wochen zählen nur, wenn sie mindestens einen Schultag enthalten (Feiertage und Schulferien berücksichtigt).
 
 **Formel:**
@@ -91,6 +84,14 @@ Wobei:
 - **Anteil_Endwoche** (je nach Wochentag des Enddatums):
   - Montag = 0.2, Dienstag = 0.4, Mittwoch = 0.6, Donnerstag = 0.8, Freitag = 1.0
   - Samstag, Sonntag = 0
+
+### Auf Basis von 'Schultagen': Idealwochenberechnung
+Zählt die tatsächlichen Schultage (Montag-Freitag) ohne Feiertage und Schulferien und teilt durch 5.
+
+**Formel:**
+```
+Schulwochen = Anzahl_Schultage / 5
+```
 
 ## Features der Benutzeroberfläche
 
