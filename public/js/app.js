@@ -4,7 +4,7 @@ import { getSchoolDays } from "../../src/schoolDayCalculator.js";
 import { getReadableDateString } from "../../src/dateExtension.js";
 
 // App version
-const APP_VERSION = "1.1.2";
+const APP_VERSION = "1.1.3";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize help modal
